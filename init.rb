@@ -4,7 +4,7 @@ Redmine::Plugin.register :redmine_ticket_merger do
   name 'Redmine Ticket Merger'
   author 'Leander Kretschmer'
   description 'Ermöglicht das Zusammenführen von Tickets in Redmine'
-  version '2.4.0'
+  version '2.5.0'
   url 'https://github.com/leanderkretschmer/redmine_ticket_merger'
   author_url 'https://github.com/leanderkretschmer'
   requires_redmine version_or_higher: '6.0.0'
@@ -21,16 +21,4 @@ end
 
 # Patches laden
 require_relative 'lib/redmine_ticket_merger/patches/issues_controller_patch'
-
-# Routes registrieren
-Rails.application.routes.draw do
-  resources :projects do
-    resources :issues, :only => [] do
-      collection do
-        get :merge_form
-        post :merge
-      end
-    end
-  end
-end
 
