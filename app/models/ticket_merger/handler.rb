@@ -48,101 +48,120 @@ module TicketMerger
     
     
     class Handler
-      # Pour l'instant le merge des tickets est destructif pour certaines parties.
-      # TODO : Garder toutes les informations du ticket. Et pouvoir faire un rollback en cas de 
+      attr_reader :from_issue, :to_issue
+      attr_accessor :journal, :unsaved_attachments, :attached_attachments, :time_entries
       
-      attr_reader :from_issue
-      attr_reader :to_issue
-      attr_accessor :journal
-      attr_accessor :unsaved_attachments
-      attr_accessor :attached_attachments
-      attr_accessor :time_entries
-      
-      def initialize(from,to)    
+      def initialize(from, to)
         @from_issue = Issue.find(from)
-        @to_issue = Issue.find(to)     
-        self.prepare
-        self.save
+        @to_issue = Issue.find(to)
+        validate_merge_conditions
+        prepare
+        save
       end
       
       def save
-        @to_issue.save   
+        @to_issue.save!
       end
       
       def separator
-          "\n"
+        "\n"
       end
-      
       
       def time_entries
         @time_entries ||= []
       end
       
       def attached_attachments
-        @attached_attachments ||= []        
+        @attached_attachments ||= []
       end
       
       def unsaved_attachments
-        @unsaved_attachments ||= []        
+        @unsaved_attachments ||= []
       end
       
-      protected
+      private
       
-      # Merge the journals
+      def validate_merge_conditions
+        raise "Quell- und Ziel-Ticket müssen im gleichen Projekt sein" unless from_issue.project_id == to_issue.project_id
+        raise "Quell-Ticket ist bereits geschlossen" if from_issue.closed?
+        raise "Ziel-Ticket ist geschlossen" if to_issue.closed?
+      end
       
+      # Merge der Journals
       def merge_journals
-        notes = "* Ticket##{from_issue.id} : "
+        notes = "* Ticket ##{from_issue.id} : "
         notes << [
-        from_issue.description, 
-        from_issue.journals.find(:all,:order => "created_on ASC",:include => {:journalized => :details}).collect do |journal|
-          journal.notes 
-        end
-        ].flatten.join(separator)
+          from_issue.description,
+          from_issue.journals.includes(:details).order(created_on: :asc).map(&:notes)
+        ].flatten.compact.join(separator)
         
-        self.journal = to_issue.journals.build(:user_id => to_issue.author_id, :notes => notes)        
+        self.journal = to_issue.journals.build(
+          user_id: User.current.id,
+          notes: notes
+        )
       end
       
-      
-      def merge_attachments   
-        files_hash = from_issue.attachments.inject([]) do |memo,value|
-          memo <<  {:path => value.diskfile, :original_filename =>  value.filename, :description => value.description}
-        end
-        attachments = FileArtifact.read(files_hash)
-        # TODO : Create attachment observe if it was moved in the model in the future version of Redmine
-        
-        if attachments && attachments.is_a?(Hash)
-          attachments.each_value do |attachment|
-            
-            next unless attachment && attachment.size > 0
-            a = Attachment.create(:container => to_issue, 
-                                  :file => attachment,
-                                  :description => "Ticket##{from_issue.id} : " + attachment.description.to_s.strip,
-            :author => to_issue.author)
-            a.new_record? ? (self.unsaved_attachments << a) : (self.attached_attachments << a)
+      # Merge der Anhänge
+      def merge_attachments
+        from_issue.attachments.each do |attachment|
+          next unless attachment && attachment.diskfile && File.exist?(attachment.diskfile)
+          
+          new_attachment = Attachment.new(
+            container: to_issue,
+            file: File.open(attachment.diskfile),
+            filename: attachment.filename,
+            description: "Ticket ##{from_issue.id}: #{attachment.description}".strip,
+            author: User.current
+          )
+          
+          if new_attachment.save
+            self.attached_attachments << new_attachment
+          else
+            self.unsaved_attachments << new_attachment
           end
-          #          if unsaved.any?
-          #            flash[:warning] = l(:warning_attachments_not_saved, unsaved.size)
-          #          end
         end
-        
       end
       
-      # Clone the <tt>from_issue.time_entries</tt> 
+      # Clone der Zeiteinträge
       def merge_time_entries
-        self.time_entries = to_issue.time_entries.build(from_issue.time_entries.map(&:attributes))
-        self.time_entries.each do |te|
-          te.comments = "Ticket ##{from_issue.id}: #{te.comments}"
-          te.user_id = from_issue.author_id          
-          te.project_id = from_issue.project_id
-        end        
-        self.to_issue.time_entries += self.time_entries
+        from_issue.time_entries.each do |time_entry|
+          new_time_entry = TimeEntry.new(
+            project: to_issue.project,
+            issue: to_issue,
+            user: time_entry.user,
+            activity: time_entry.activity,
+            hours: time_entry.hours,
+            comments: "Ticket ##{from_issue.id}: #{time_entry.comments}".strip,
+            spent_on: time_entry.spent_on
+          )
+          
+          if new_time_entry.save
+            self.time_entries << new_time_entry
+          end
+        end
       end
       
       def prepare
-        self.merge_journals
-        self.merge_time_entries
-        self.merge_attachments
+        merge_journals
+        merge_time_entries
+        merge_attachments
+        
+        # Quell-Ticket als zusammengeführt markieren
+        from_issue.status = IssueStatus.find_by(name: 'Merged') || IssueStatus.find_by(is_closed: true)
+        from_issue.save!
+        
+        # Verknüpfung zwischen den Tickets erstellen
+        create_issue_relation
       end
       
+      def create_issue_relation
+        IssueRelation.create!(
+          issue_from: from_issue,
+          issue_to: to_issue,
+          relation_type: 'relates'
+        )
+      rescue ActiveRecord::RecordInvalid
+        # Relation existiert bereits oder kann nicht erstellt werden
+      end
     end
   end

@@ -1,2 +1,21 @@
-# English strings go here
-my_label: "My label"
+en:
+  label_merge_issues: "Merge Issues"
+  label_source_issue: "Source Issue"
+  label_target_issue: "Target Issue"
+  label_back_to_issues: "Back to Issues"
+  
+  button_merge_issues: "Merge Issues"
+  button_cancel: "Cancel"
+  
+  warning_merge_irreversible: "Warning: Merging issues is irreversible!"
+  info_merge_attachments: "All attachments will be copied to the target issue"
+  info_merge_time_entries: "All time entries will be copied to the target issue"
+  info_merge_journals: "All comments and changes will be transferred to the target issue"
+  info_source_issue_closed: "The source issue will be marked as 'Merged' and closed"
+  
+  notice_issues_merged_successfully: "Issues successfully merged: %{from} → %{to}"
+  error_select_both_issues: "Please select both a source and target issue"
+  error_cannot_merge_same_issue: "An issue cannot be merged with itself"
+  error_merge_failed: "Merge failed: %{message}"
+  
+  text_are_you_sure: "Are you sure you want to merge these issues?"

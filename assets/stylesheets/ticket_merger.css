@@ -1,0 +1,105 @@
+/* Ticket Merger Plugin Styles */
+
+.warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+.warning p {
+  margin: 0 0 10px 0;
+  color: #856404;
+  font-weight: bold;
+}
+
+.warning ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #856404;
+}
+
+.warning li {
+  margin-bottom: 5px;
+}
+
+#merge-form .splitcontent {
+  margin-bottom: 20px;
+}
+
+#merge-form .splitcontentleft,
+#merge-form .splitcontentright {
+  width: 48%;
+}
+
+#merge-form .splitcontentleft {
+  float: left;
+}
+
+#merge-form .splitcontentright {
+  float: right;
+}
+
+#merge-form fieldset {
+  margin-bottom: 15px;
+}
+
+#merge-form legend {
+  font-weight: bold;
+  color: #333;
+}
+
+#merge-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+#merge-form select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#merge-form .button-positive {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+#merge-form .button-positive:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+#merge-form .button {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+#merge-form .button:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  #merge-form .splitcontentleft,
+  #merge-form .splitcontentright {
+    width: 100%;
+    float: none;
+    margin-bottom: 15px;
+  }
+}
