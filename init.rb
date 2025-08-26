@@ -22,3 +22,22 @@ end
 # Patches laden
 require_relative 'lib/redmine_ticket_merger/patches/issues_controller_patch'
 
+# Routes registrieren
+ActionDispatch::Routing::Mapper.class_eval do
+  def draw_redmine_ticket_merger_routes
+    resources :projects do
+      resources :issues, :only => [] do
+        collection do
+          get :merge_form
+          post :merge
+        end
+      end
+    end
+  end
+end
+
+# Routes nach der Plugin-Registrierung hinzufügen
+Rails.application.routes.draw do
+  draw_redmine_ticket_merger_routes
+end
+
