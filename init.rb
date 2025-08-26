@@ -20,4 +20,5 @@ require_relative 'lib/redmine_ticket_merger/patches/issues_controller_patch'
 require_relative 'lib/redmine_ticket_merger/patches/issues_helper_patch'
 require_relative 'lib/redmine_ticket_merger/patches/application_helper_patch'
 require_relative 'lib/redmine_ticket_merger/patches/context_menus_controller_patch'
+require_relative 'lib/redmine_ticket_merger/patches/context_menus_helper_patch'
 
