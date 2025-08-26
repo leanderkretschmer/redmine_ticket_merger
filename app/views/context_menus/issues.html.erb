@@ -1,0 +1,38 @@
+<% if @issues.size == 1 %>
+  <h3><%= link_to_issue @issues.first %></h3>
+<% else %>
+  <h3><%= @issues.length %> issues</h3>
+<% end %>
+
+<div class="contextual">
+  <% if @can[:edit] %>
+    <%= link_to l(:button_edit), edit_issues_path(:ids => @issues.map(&:id), :back_url => @back), :class => 'icon icon-edit' %>
+  <% end %>
+  
+  <% if @can[:merge] %>
+    <%= link_to l(:label_merge_issue), merge_form_issue_path(@issues.first), :class => 'icon icon-merge' %>
+  <% end %>
+  
+  <% if @can[:log_time] %>
+    <%= link_to l(:button_log_time), new_issues_time_entry_path(:issue_ids => @issues.map(&:id)), :class => 'icon icon-time-add' %>
+  <% end %>
+  
+  <% if @can[:copy] %>
+    <%= link_to l(:button_copy), new_issues_path(:ids => @issues.map(&:id), :copy => 1), :class => 'icon icon-copy' %>
+  <% end %>
+  
+  <% if @can[:delete] %>
+    <%= link_to l(:button_delete), issues_path(:ids => @issues.map(&:id), :back_url => @back), :method => :delete, :data => {:confirm => l(:text_issues_destroy_confirmation)}, :class => 'icon icon-del' %>
+  <% end %>
+</div>
+
+<% if @issues.size == 1 %>
+  <h4><%= @issues.first.subject %></h4>
+  <ul>
+    <li><%= l(:field_status) %>: <%= @issues.first.status %></li>
+    <li><%= l(:field_priority) %>: <%= @issues.first.priority %></li>
+    <li><%= l(:field_assigned_to) %>: <%= @issues.first.assigned_to %></li>
+    <li><%= l(:field_category) %>: <%= @issues.first.category %></li>
+    <li><%= l(:field_fixed_version) %>: <%= @issues.first.fixed_version %></li>
+  </ul>
+<% end %>
