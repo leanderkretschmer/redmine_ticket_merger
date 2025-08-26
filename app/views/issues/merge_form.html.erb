@@ -1,40 +1,31 @@
-<% html_title l(:label_merge_issues) %>
+<% html_title l(:label_merge_issue) %>
 
 <div class="contextual">
-  <%= link_to l(:label_back_to_issues), project_issues_path(@project), :class => 'icon icon-list' %>
+  <%= link_to l(:label_back_to_issue), issue_path(@issue), :class => 'icon icon-arrow-left' %>
 </div>
 
-<h2><%= l(:label_merge_issues) %></h2>
+<h2><%= l(:label_merge_issue) %>: #<%= @issue.id %> - <%= @issue.subject %></h2>
 
-<%= form_tag merge_project_issues_path(@project), :method => :post, :id => 'merge-form' do %>
+<%= form_tag merge_issue_path(@issue), :method => :post, :id => 'merge-form' do %>
   <div class="box">
-    <div class="splitcontent">
-      <div class="splitcontentleft">
-        <fieldset class="box">
-          <legend><%= l(:label_source_issue) %></legend>
-          <p>
-            <label for="from_issue_id"><%= l(:field_issue) %></label>
-            <%= select_tag 'from_issue_id', 
-                          options_from_collection_for_select(@issues, :id, :to_s), 
-                          :include_blank => true,
-                          :required => true %>
-          </p>
-        </fieldset>
+    <fieldset class="box">
+      <legend><%= l(:label_target_issue) %></legend>
+      
+      <div class="field">
+        <label for="issue_search"><%= l(:field_search_issue) %></label>
+        <input type="text" id="issue_search" placeholder="<%= l(:placeholder_search_issue) %>" class="search-input" />
+        <div id="search_results" class="search-results"></div>
       </div>
       
-      <div class="splitcontentright">
-        <fieldset class="box">
-          <legend><%= l(:label_target_issue) %></legend>
-          <p>
-            <label for="to_issue_id"><%= l(:field_issue) %></label>
-            <%= select_tag 'to_issue_id', 
-                          options_from_collection_for_select(@issues, :id, :to_s), 
-                          :include_blank => true,
-                          :required => true %>
-          </p>
-        </fieldset>
+      <div class="field">
+        <label for="to_issue_id"><%= l(:field_target_issue) %></label>
+        <%= select_tag 'to_issue_id', 
+                      options_from_collection_for_select(@issues, :id, :to_s), 
+                      :include_blank => true,
+                      :required => true,
+                      :class => 'target-issue-select' %>
       </div>
-    </div>
+    </fieldset>
     
     <div class="warning">
       <p><strong><%= l(:warning_merge_irreversible) %></strong></p>
@@ -49,38 +40,57 @@
   
   <p>
     <%= submit_tag l(:button_merge_issues), :class => 'button-positive', :data => { :confirm => l(:text_are_you_sure) } %>
-    <%= link_to l(:button_cancel), project_issues_path(@project), :class => 'button' %>
+    <%= link_to l(:button_cancel), issue_path(@issue), :class => 'button' %>
   </p>
 <% end %>
 
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag 'ticket_merger', :plugin => 'redmine_ticket_merger' %>
+  <%= javascript_include_tag 'ticket_merger', :plugin => 'redmine_ticket_merger' %>
 <% end %>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const fromSelect = document.getElementById('from_issue_id');
-  const toSelect = document.getElementById('to_issue_id');
+  const searchInput = document.getElementById('issue_search');
+  const searchResults = document.getElementById('search_results');
+  const targetSelect = document.querySelector('.target-issue-select');
+  let searchTimeout;
   
-  function updateSelects() {
-    const fromValue = fromSelect.value;
-    const toValue = toSelect.value;
+  // Suchfunktion
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
     
-    // Verhindere gleiche Auswahl
-    if (fromValue && toValue && fromValue === toValue) {
-      alert('<%= j l(:error_cannot_merge_same_issue) %>');
-      return false;
+    if (query.length < 2) {
+      searchResults.innerHTML = '';
+      return;
     }
     
-    return true;
-  }
+    searchTimeout = setTimeout(function() {
+      fetch('<%= search_target_issues_issue_path(@issue) %>?q=' + encodeURIComponent(query))
+        .then(response => response.json())
+        .then(data => {
+          searchResults.innerHTML = '';
+          data.forEach(issue => {
+            const div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.textContent = issue.text;
+            div.addEventListener('click', function() {
+              targetSelect.value = issue.id;
+              searchResults.innerHTML = '';
+              searchInput.value = '';
+            });
+            searchResults.appendChild(div);
+          });
+        });
+    }, 300);
+  });
   
-  fromSelect.addEventListener('change', updateSelects);
-  toSelect.addEventListener('change', updateSelects);
-  
+  // Validierung
   document.getElementById('merge-form').addEventListener('submit', function(e) {
-    if (!updateSelects()) {
+    if (!targetSelect.value) {
       e.preventDefault();
+      alert('<%= j l(:error_select_target_issue) %>');
     }
   });
 });

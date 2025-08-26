@@ -1,8 +1,11 @@
 en:
-  label_merge_issues: "Merge Issues"
-  label_source_issue: "Source Issue"
+  label_merge_issue: "Merge Issue"
   label_target_issue: "Target Issue"
-  label_back_to_issues: "Back to Issues"
+  label_back_to_issue: "Back to Issue"
+  
+  field_search_issue: "Search Issue"
+  field_target_issue: "Select Target Issue"
+  placeholder_search_issue: "Enter issue ID or subject..."
   
   button_merge_issues: "Merge Issues"
   button_cancel: "Cancel"
@@ -14,7 +17,7 @@ en:
   info_source_issue_closed: "The source issue will be marked as 'Merged' and closed"
   
   notice_issues_merged_successfully: "Issues successfully merged: %{from} → %{to}"
-  error_select_both_issues: "Please select both a source and target issue"
+  error_select_target_issue: "Please select a target issue"
   error_cannot_merge_same_issue: "An issue cannot be merged with itself"
   error_merge_failed: "Merge failed: %{message}"
   

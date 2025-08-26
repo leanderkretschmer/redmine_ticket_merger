@@ -1,8 +1,11 @@
 de:
-  label_merge_issues: "Tickets zusammenführen"
-  label_source_issue: "Quell-Ticket"
+  label_merge_issue: "Ticket zusammenführen"
   label_target_issue: "Ziel-Ticket"
-  label_back_to_issues: "Zurück zu Tickets"
+  label_back_to_issue: "Zurück zum Ticket"
+  
+  field_search_issue: "Ticket suchen"
+  field_target_issue: "Ziel-Ticket auswählen"
+  placeholder_search_issue: "Ticket-ID oder Betreff eingeben..."
   
   button_merge_issues: "Tickets zusammenführen"
   button_cancel: "Abbrechen"
@@ -14,7 +17,7 @@ de:
   info_source_issue_closed: "Das Quell-Ticket wird als 'Zusammengeführt' markiert und geschlossen"
   
   notice_issues_merged_successfully: "Tickets erfolgreich zusammengeführt: %{from} → %{to}"
-  error_select_both_issues: "Bitte wählen Sie sowohl ein Quell- als auch ein Ziel-Ticket aus"
+  error_select_target_issue: "Bitte wählen Sie ein Ziel-Ticket aus"
   error_cannot_merge_same_issue: "Ein Ticket kann nicht mit sich selbst zusammengeführt werden"
   error_merge_failed: "Zusammenführen fehlgeschlagen: %{message}"
   
